@@ -6,18 +6,10 @@ function git_prompt_info() {
 
 # Checks if working tree is dirty
 parse_git_dirty() {
-  gitstat=$(git status 2>/dev/null | grep '\(# Untracked\|# Changes\|# Changed but not updated:\)')
-
-  if [[ $(echo ${gitstat} | grep -c "^# Changes to be committed:$") > 0 ]]; then
-	echo -n "$ZSH_THEME_GIT_PROMPT_DIRTY"
-  fi
-
-  if [[ $(echo ${gitstat} | grep -c "^\(# Untracked files:\|# Changed but not updated:\|# Changes not staged for commit:\)$") > 0 ]]; then
-	echo -n "$ZSH_THEME_GIT_PROMPT_UNTRACKED"
-  fi 
-
-  if [[ $(echo ${gitstat} | grep -v '^$' | wc -l | tr -d ' ') == 0 ]]; then
-	echo -n "$ZSH_THEME_GIT_PROMPT_CLEAN"
+  if [[ -n $(git status -s 2> /dev/null) ]]; then
+    echo "$ZSH_THEME_GIT_PROMPT_DIRTY"
+  else
+    echo "$ZSH_THEME_GIT_PROMPT_CLEAN"
   fi
 }
 
@@ -60,7 +52,7 @@ git_prompt_status() {
   if $(echo "$INDEX" | grep '^R  ' &> /dev/null); then
     STATUS="$ZSH_THEME_GIT_PROMPT_RENAMED$STATUS"
   fi
-  if $(echo "$INDEX" | grep '^ D ' &> /dev/null); then
+  if $(echo "$INDEX" | grep '^D ' &> /dev/null); then
     STATUS="$ZSH_THEME_GIT_PROMPT_DELETED$STATUS"
   elif $(echo "$INDEX" | grep '^AD ' &> /dev/null); then
     STATUS="$ZSH_THEME_GIT_PROMPT_DELETED$STATUS"
@@ -68,5 +60,6 @@ git_prompt_status() {
   if $(echo "$INDEX" | grep '^UU ' &> /dev/null); then
     STATUS="$ZSH_THEME_GIT_PROMPT_UNMERGED$STATUS"
   fi
+
   echo $STATUS
 }
